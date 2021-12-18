@@ -11,6 +11,7 @@ namespace Company.Domain.Entity
         public int Id { get; set; }
         public string Title { get; set; }
         public List<Item> Items { get; set; }
+        public Guid AppUserId { get; set; }
 
     }
 }

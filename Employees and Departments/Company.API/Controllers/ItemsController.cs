@@ -13,7 +13,7 @@ namespace Company.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize]
     public class ItemsController : ControllerBase
     {
         private readonly CompanyContext _context;

@@ -1,4 +1,5 @@
 ﻿using Company.Domain.Entity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -13,19 +14,19 @@ namespace Company.Data.Security
     {
         private JwtSettings _settings ;
         private readonly CompanyContext _context;
-        public SecurityManager(CompanyContext context, JwtSettings settings)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public SecurityManager(CompanyContext context, JwtSettings settings, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _settings = settings;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public AppUserAuth ValidateUser(AppUser user)
         {
             AppUserAuth ret = new AppUserAuth();
-            AppUser authUser = null;
-
             // we shoud hash password later
-            authUser = _context.Users.Where(
+            AppUser authUser = _context.Users.Where(
               u => u.UserName.ToLower() == user.UserName.ToLower()
               && u.Password == user.Password).FirstOrDefault();
 
@@ -36,6 +37,16 @@ namespace Company.Data.Security
             }
 
             return ret;
+        }
+
+        public AppUser GetUser()
+        {
+            var userName = _httpContextAccessor.HttpContext.User.Claims.ToList()[0].Value;
+
+            AppUser authUser = _context.Users.Where(
+              u => u.UserName.ToLower() == userName.ToLower()).FirstOrDefault();
+
+            return authUser;
         }
 
         public List<AppUserClaim> GetUserClaims(AppUser authUser)

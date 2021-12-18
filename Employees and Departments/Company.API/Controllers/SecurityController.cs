@@ -13,9 +13,11 @@ namespace Company.API.Controllers
     public class SecurityController : ControllerBase
     {
         private readonly ISecurityManager _securityManager;
-        public SecurityController(ISecurityManager securityManager)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public SecurityController(ISecurityManager securityManager, IHttpContextAccessor httpContextAccessor)
         {
             _securityManager = securityManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("login")]

@@ -1,12 +1,15 @@
+using Company.API.Controllers;
 using Company.Data;
 using Company.Data.Security;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -66,7 +69,20 @@ namespace Company.API
             {
                 // NOTE: The claim type and value are case-sensitive
             });
+            services.AddHttpContextAccessor();
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => false;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
 
+            services.AddDistributedMemoryCache();
+
+            services.AddSession(options =>
+            {
+                options.Cookie.IsEssential = true; 
+                options.IdleTimeout = TimeSpan.FromSeconds(30);
+            });
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -87,6 +103,8 @@ namespace Company.API
 
 
             services.AddSingleton(settings);
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<WizardsController>();
             services.AddTransient<ISecurityManager, SecurityManager>();
         }
 
@@ -112,6 +130,7 @@ namespace Company.API
 
             app.UseAuthorization();
 
+            app.UseSession();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

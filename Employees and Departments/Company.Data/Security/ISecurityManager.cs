@@ -12,6 +12,7 @@ namespace Company.Data.Security
         AppUserAuth ValidateUser(AppUser user);
         List<AppUserClaim> GetUserClaims(AppUser authUser);
         AppUserAuth BuildUserAuthObject(AppUser authUser);
+        AppUser GetUser();
         string BuildJwtToken(AppUserAuth authUser);
     }
 }

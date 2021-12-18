@@ -1,4 +1,5 @@
 ﻿using Company.Data;
+using Company.Data.Security;
 using Company.Domain.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,28 +14,41 @@ namespace Company.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize]
     public class WizardsController : ControllerBase
     {
         private readonly CompanyContext _context;
+        private readonly ISecurityManager _securityManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public WizardsController(CompanyContext context)
+        public WizardsController(CompanyContext context , ISecurityManager securityManager, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _securityManager = securityManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/Wizards
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Wizard>>> GetWizards()
         {
-            var Wizards = await _context.Wizards.Include(d => d.Items).ToListAsync();
-            return Wizards;
+
+            Guid UserId = _securityManager.GetUser().UserId;
+            if(UserId != null)
+            {
+                var Wizards = await _context.Wizards.Where(w=>w.AppUserId == UserId).Include(i => i.Items).ToListAsync();
+                return Wizards;
+            }
+            else
+                return NoContent();
         }
 
         // GET: api/Wizards/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Wizard>> GetWizard(int id)
         {
+
+
             var wizards = await _context.Wizards.FindAsync(id);
 
             if (wizards == null)
@@ -49,6 +63,9 @@ namespace Company.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Wizard>> PostWizard(Wizard wizard)
         {
+
+            Guid UserId = _securityManager.GetUser().UserId;
+            wizard.AppUserId = UserId;
             _context.Wizards.Add(wizard);
             try
             {
@@ -61,7 +78,7 @@ namespace Company.API.Controllers
                 throw;
             }
 
-            return CreatedAtAction("GetWizard", new { id = wizard.Id }, wizard);
+            return CreatedAtAction("GetWizard", new { id = 1 }, wizard);
         }
 
         // DELETE: api/Wizards/5

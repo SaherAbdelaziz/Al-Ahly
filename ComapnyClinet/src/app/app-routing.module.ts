@@ -5,19 +5,15 @@ import { AuthGuard } from './security/auth.guard';
 import { LoginComponent } from './security/login/login.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent, pathMatch: 'full' },
+  { path: '', component: LoginComponent },
   {
-    path: 'Employees',
+    path: 'Home',
     component: HomeComponent,
     canActivate: [AuthGuard],
     data: { isAuthorized: 'isAuthenticated' }
   },
-  {
-    path: 'Departments', component: HomeComponent,
-    canActivate: [AuthGuard],
-    data: { isAuthorized: 'isAuthenticated' }
-  },
   { path: 'Login', component: LoginComponent },
+   { path: '**', redirectTo: '' }
 
 ];
 
