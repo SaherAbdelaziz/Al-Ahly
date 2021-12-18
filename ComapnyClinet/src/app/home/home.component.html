@@ -1,14 +1,50 @@
-<ng-wizard [config]="config" (stepChanged)="stepChanged($event)" >
-  
+<ng-wizard [config]="config" (stepChanged)="stepChanged($event)" *ngIf=" wizards.length != 0 && !loading">
 
-  <ng-wizard-step *ngFor="let wizard of wizards" [title]="wizard.title"
-    [canEnter]="isValidTypeBoolean" [canExit]="isValidFunctionReturnsBoolean.bind(this)">
-    
-    <app-wizard-details [items]="wizard.items"></app-wizard-details>
+
+  <ng-wizard-step *ngFor="let wizard of wizards" [title]="wizard.title ">
+    <div class="d-flex bd-highlight mb-3">
+      <button class="btn btn-sm btn-danger  btn-block p-2 bd-highlight" (click)="deleteWizard(wizard.id)">Delete
+        Wizard</button>
+      <button class="btn btn-sm btn-secondary btn-block ms-auto p-2 bd-highlight" (click)="addWizard()">Add New
+        Wizard</button>
+      <button class="btn btn-sm btn-secondary btn-block p-2 bd-highlight" (click)="resutItem()">Add New Item</button>
+    </div>
+
+    <app-wizard-details (itemChangedEmiiter)="onItemChange($event)" [items]="wizard.items"></app-wizard-details>
+
   </ng-wizard-step>
 
+  <div class="modal-content">
 
-<div class="form-group">
+    <div class="modal-body">
+      <form #itemForm="ngForm" (ngSubmit)="save(itemForm)">
+        <div class="row">
+          <div class="col-lg-3">
+            <label>Title</label>
+            <input type="text" id="name" required name="name" [(ngModel)]="item!.name" class="form-control"
+              placeholder="{{ 'Title' }}">
+
+            <br>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-3">
+            <label>Description</label>
+            <input type="text" id="description" required name="description" [(ngModel)]="item!.description"
+              class="form-control" placeholder="{{ 'Description' }}">
+
+            <br>
+            <button (click)="save(itemForm)" type="button" class="btn btn-primary px-4  mx-1"
+              [disabled]="item!.name == '' || item!.description==''" translate>Save</button>
+
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="form-group">
     <div class="btn-toolbar ng-wizard-toolbar ng-wizard-toolbar-top justify-content-start">
       <div class="btn-group mr-2 ng-wizard-btn-group">
         <button type="button" (click)="showPreviousStep($event)" class="btn btn-secondary ng-wizard-btn-prev">
@@ -21,20 +57,17 @@
         <select [(ngModel)]="selectedTheme" (change)="themeSelected()">
           <option *ngFor="let theme of themes" [ngValue]="theme">{{ theme }}</option>
         </select>
-        <!-- <select [(ngModel)]="selectedStepIndex" (change)="stepIndexSelected()">
-          <option *ngFor="let stepIndex of stepIndexes" [ngValue]="stepIndex">{{ 'Step - ' + (stepIndex + 1) }}</option>
-        </select> -->
       </div>
     </div>
   </div>
-  
-  <!-- <ng-wizard-step [title]="'Step 2'" [description]="'Step 2 description'" [state]="stepStates.disabled">
-    <span>Step 2 content</span>
-  </ng-wizard-step>
-  
-  <ng-wizard-step [title]="'Step 3'" [description]="'Step 3 description'"
-    [canEnter]="isValidFunctionReturnsObservable.bind(this)" [canExit]="isValidFunctionReturnsBoolean.bind(this)">
-    <span>Step 3 content</span>
-  </ng-wizard-step>
-  -->
+
 </ng-wizard>
+
+
+<div *ngIf=" loading"> Loading ...</div>
+<div *ngIf=" wizards.length == 0 && !loading"> There is no Data .. Plese add some !
+  <div>
+    <button class="btn btn-sm btn-secondary btn-block ms-auto p-2 bd-highlight" (click)="addWizard()">Add New
+      Wizard</button>
+  </div>
+</div>

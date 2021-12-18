@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { of } from 'rxjs';
 import { NgWizardConfig, NgWizardService, StepChangedArgs, StepValidationArgs, STEP_STATE, THEME } from 'ng-wizard';
-import { Wizards } from '../models/wizard.model';
+import { Wizard } from '../models/wizard.model';
 import { Item } from '../models/item.model';
+import { HttpClient } from '@angular/common/http';
+import { WizardService } from '../services/wizard.service';
+import { NgForm } from '@angular/forms';
+import { WizardDetailsService } from '../services/wizard-details.service';
+import { ItemEnum } from '../models/item.enum';
 
 @Component({
   selector: 'app-home',
@@ -11,19 +16,17 @@ import { Item } from '../models/item.model';
 
 
 export class HomeComponent {
-  wizards: Array<Wizards> = [{
-    title: "firstTitle", description: "firstDesc", content: "firstContent",
-    items: [{ name: "item1", description: "item1Desc" }, { name: "item2", description: "item2Desc" }]
-  },
-  { title: "secondTitle", description: "secondDesc", content: "secondContent", items: [] },
-  { title: "thirdTitle", description: "thirdDesc", content: "thirdContent", items: [] },
-  { title: "forthTitle", description: "forthDesc", content: "forthContent", items: [] }];
+
+  Submit: boolean = false;
+  loading: boolean = true;
+  item: Item = new Item("", "", 0, 0);
+  itemEnum = ItemEnum;
 
   stepStates = { normal: STEP_STATE.normal, disabled: STEP_STATE.disabled, error: STEP_STATE.error, hidden: STEP_STATE.hidden };
   themes = [THEME.default, THEME.arrows, THEME.circles, THEME.dots];
   stepIndexes: Array<number> = [];
   selectedTheme?: THEME;
-  selectedStepIndex?: number;
+  selectedStepIndex: number = 0;
 
   config: NgWizardConfig = {
     selected: 0,
@@ -35,29 +38,114 @@ export class HomeComponent {
     }
   };
 
-  constructor(private ngWizardService: NgWizardService) {
-    //this.setstepIndexes();
+
+  wizards: Array<Wizard> = [];
+  currentWizardIId: number = 0;
+  constructor(private ngWizardService: NgWizardService, private wizardService: WizardService,
+    private wizardDetailsService: WizardDetailsService) {
+
   }
 
+
   ngOnInit() {
+    this.getAllWizards();
     this.selectedTheme = this.config.theme;
-    this.selectedStepIndex = this.config.selected;
+    this.selectedStepIndex = this.config.selected ? this.config.selected : 0;
 
     this.ngWizardService.stepChanged()
       .subscribe({
         next: (args) => {
-          console.log('catching step change - method 2');
         }
       });
 
   }
+  getAllWizards() {
+    this.wizardService.getAllWizards().subscribe(response => {
+      this.wizards = response;
+      this.loading = false;
+    });
+  }
 
+
+  resutItem() {
+    this.item = new Item("", "", 0, 0)
+  }
+
+  addWizard() {
+    let wizard: Wizard = new Wizard(`Step ${this.wizards.length + 1}`, [])
+    this.wizardService.AddWizard(wizard).subscribe(response => {
+      this.wizards.push(response);
+      this.loading = true;
+      this.getAllWizards();
+    });
+
+  }
+  deleteWizard(id: number) {
+    this.wizardService.DeleteWizard(id).subscribe(response => {
+      this.loading = true;
+      this.getAllWizards();
+    });
+  }
+
+  public save(form: NgForm) {
+    this.Submit = true;
+    if (form.valid) {
+      if (this.item) {
+        if (this.item.id != 0) { // edit mode
+          this.wizardDetailsService.UpdateItem(this.item, this.item.id).subscribe(response => {
+            let itemIndex = this.wizards[this.selectedStepIndex].items.findIndex(x => x.id == this.item.id);
+            this.wizards[this.selectedStepIndex].items[itemIndex] = this.item;
+            this.loading = true;
+            this.getAllWizards();
+          });
+        }
+
+        else { // add mode
+
+          this.item.wizardId = this.currentWizardIId;
+          this.wizardDetailsService.AddItem(this.item).subscribe(response => {
+            this.wizards[this.selectedStepIndex].items.push(this.item);
+            this.loading = true;
+            this.getAllWizards();
+          });
+        }
+
+
+      }
+
+    }
+  }
+  deleteItem(item:Item){
+    this.wizardDetailsService.DeleteItem(item.id).subscribe(response => {
+      this.wizards[this.selectedStepIndex].items = 
+      this.wizards[this.selectedStepIndex].items.filter(x => x.id != this.item.id);
+        
+      this.loading = true;
+      this.getAllWizards();
+    });
+  }
+
+  onItemChange(event: any) {
+    if (event.state == this.itemEnum.View)
+      this.item = { ...event.item };
+    else if (event.state == this.itemEnum.Delete) {
+      this.deleteItem(event.item);
+    }
+  }
+
+
+
+  // Wizard functions
   showPreviousStep(event?: Event) {
     this.ngWizardService.previous();
   }
 
   showNextStep(event?: Event) {
     this.ngWizardService.next();
+  }
+
+  show(event?: Event) {
+
   }
 
   resetWizard(event?: Event) {
@@ -68,8 +156,11 @@ export class HomeComponent {
     this.ngWizardService.theme(theme);
   }
 
+
   stepChanged(args: StepChangedArgs) {
-    console.log(args.step);
+
+    this.selectedStepIndex = args.step.index;
+    this.currentWizardIId = this.wizards[this.selectedStepIndex].id;
   }
 
   isValidTypeBoolean: boolean = true;
@@ -91,11 +182,5 @@ export class HomeComponent {
     if (this.selectedStepIndex)
       this.ngWizardService.show(this.selectedStepIndex);
   }
-  // setstepIndexes() {
-  //   for (let i = 0; i < Wizards.length; i++) {
-
-  //     this.stepIndexes.push(i);
-  //   }
-  // }
 }
 

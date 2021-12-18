@@ -65,10 +65,15 @@ namespace Company.API
             services.AddAuthorization(cfg =>
             {
                 // NOTE: The claim type and value are case-sensitive
-                cfg.AddPolicy("CanAccessEmployees", p => p.RequireClaim("CanAccessEmployees", "True"));
             });
 
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.WithOrigins("http://localhost:4200/").AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
             services.AddControllers();
             services.AddDbContext<CompanyContext>(opt =>
             opt.UseSqlServer(Configuration.GetConnectionString("CompanyContext"))
@@ -90,12 +95,8 @@ namespace Company.API
         {
 
 
-            app.UseCors(
-            options => options.WithOrigins(
-            "http://localhost:4200").AllowAnyMethod().AllowAnyHeader()
-            );
 
-
+            app.UseCors("CorsPolicy");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -108,11 +109,14 @@ namespace Company.API
             app.UseRouting();
 
             app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                        name: "default",
+                        pattern: "{controller}/{action=Index}/{id?}");
             });
 
 

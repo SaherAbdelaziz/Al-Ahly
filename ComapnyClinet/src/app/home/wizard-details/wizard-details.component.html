@@ -1,6 +1,17 @@
-<ul>    
-    <li *ngFor="let item of items" >
-        {{item.name}}
-        {{item.description}}
-    </li>
-</ul>
+<div *ngFor="let item of items ;let i = index">
+    <span (click)="checItem(item , itemEnum.View)" >Item {{i+1}}
+    </span>
+    <span (click)="checItem(item , itemEnum.Delete)" style="cursor: pointer;" >
+         <i  class="fa fa-trash btn-block " style="font-size:10px" ></i>
+    </span>
+
+    <ul (click)="checItem(item , itemEnum.View)">
+        <li>
+            {{item.name}}
+        </li>
+        <li>
+            {{item.description}}
+        </li>
+    </ul>
+
+</div>
