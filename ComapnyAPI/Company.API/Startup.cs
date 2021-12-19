@@ -92,7 +92,11 @@ namespace Company.API
             });
             services.AddControllers();
             services.AddDbContext<CompanyContext>(opt =>
-            opt.UseSqlServer(Configuration.GetConnectionString("CompanyContext"))
+            opt.UseSqlServer(Configuration.GetConnectionString("CompanyContext") ,
+            builder =>
+            {
+                builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            })
             .EnableSensitiveDataLogging()
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             );

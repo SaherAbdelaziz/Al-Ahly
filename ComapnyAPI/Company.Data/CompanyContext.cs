@@ -22,10 +22,16 @@ namespace Company.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Entity<Item>().ToTable("Items");
             modelBuilder.Entity<Wizard>().ToTable("Wizards");
+            modelBuilder.Entity<AppUser>().ToTable("User");
+            modelBuilder.Entity<AppUserClaim>().ToTable("UserClaim");
             modelBuilder.Entity<AppUser>().Property(x => x.UserId).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<AppUserClaim>().Property(x => x.ClaimId).HasDefaultValueSql("NEWID()");
+
+
+
         }
 
     }

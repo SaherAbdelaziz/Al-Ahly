@@ -30,9 +30,7 @@ export class SecurityService {
           Object.assign(this.securityObject, resp);
           localStorage.setItem("bearerToken",
             this.securityObject.bearerToken);
-            //we should not store any of user info in local storage .. this should be replaced later with getting user from backEnd
-            localStorage.setItem("userName",
-            this.securityObject.userName);
+            
             
         }));
   }
