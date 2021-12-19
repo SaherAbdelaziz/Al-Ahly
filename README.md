@@ -11,3 +11,9 @@ then run your api using[dotnet watch run] or normally from Visual Studio 2019
 ##
 for client side you should run [npm i] to install required libraries
 then ng serve to run the client
+##
+Features 
+1-Simple Auth mikanizm built from scratch .. tables [user] [userClimes] and using jwt to auth
+2-each user has its own Wizard data items
+3-basic crud operations create/read/update/delete
+4-using Angular ng-wizard to create stepper component which can be used for signup forms
