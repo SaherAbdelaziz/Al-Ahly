@@ -1,5 +1,5 @@
 # Al-Ahly-Momken
-Simple Task apply crud operaions on a one-many related data you should see something like this
+Simple Task apply crud operaions on a one-many related data .. you should see something like this
 ## Wizard and related Items
 ![Screenshot](image1.png)
 
