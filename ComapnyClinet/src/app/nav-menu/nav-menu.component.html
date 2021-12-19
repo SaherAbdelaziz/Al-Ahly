@@ -9,7 +9,7 @@
       <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end" [ngClass]="{ show: isExpanded }">
         <ul class="navbar-nav ">
           <li class="nav-item" [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
-            <a class="nav-link text-dark" [routerLink]="['/']">Home</a>
+            <a *ngIf="securityObject.isAuthenticated" class="nav-link text-dark" [routerLink]="['/']">Home</a>
             <a *ngIf="!securityObject.isAuthenticated" class="nav-link text-dark" [routerLink]="['/Login']">Login</a>
             <a *ngIf="securityObject.isAuthenticated" (onclick)="logout()" class="nav-link text-dark" [routerLink]="['/Login']">Logout {{securityObject.userName}}</a>
           </li>
