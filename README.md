@@ -14,6 +14,9 @@ then ng serve to run the client
 ##
 Features 
 1-Simple Auth mikanizm built from scratch .. tables [user] [userClimes] and using jwt to auth
+##
 2-each user has its own Wizard data items
+##
 3-basic crud operations create/read/update/delete
+##
 4-using Angular ng-wizard to create stepper component which can be used for signup forms
